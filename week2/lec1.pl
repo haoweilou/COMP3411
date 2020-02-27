@@ -1,21 +1,27 @@
-depthfirst(N,[N]):-goal(N).
+edge(o103, ts).
+edge(o103, b3).
+edge(o103, o109).
+edge(ts, mail).
+edge(b3, b1).
+edge(b3, b4).
+edge(b1, c2).
+edge(b1, b2).
+edge(c2, c1).
+edge(c2, c3).
+edge(c1, c3).
+edge(b2, b4).
+edge(b4, o109).
+edge(o109, o119).
+edge(o109, o111).
+edge(o119, o123).
+edge(o119, storage).
+edge(o123, 125).
+edge(o123, r123).
 
-depthfirst(N,[N|Path]):-edge(N,Neighbours),depthfirst(Neighbours,Path).
+goal(r123).
 
-edge(o103,ts).
-edge(o103,b3).
-edge(o103,o109).
-edge(ts,mail).
-edge(b3,b1).
-edge(o103,o109).
-edge(o109,o111).
-edge(o119,o111).
-
-iter(Start, Solution, L, MaxDepth):-
-    L<MaxDepth,
-    bounded_search(Start,Solution, L).
-iter(Start,Solution,L,MaxDepth):-
-    L<MaxDepth,
-    Limit is L + 1,
-    write("Increasing Limit to "), writeln(Limit),
-    iter(Start,Solution,Limit,MaxDepth).
+depthfirst(N,[N]):-
+    goal(N).
+depthfirst(N,[N|Path]):-
+    edge(N,Neighbours),
+    depthfirst(Neighbours,Path).
