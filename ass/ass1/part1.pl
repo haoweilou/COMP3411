@@ -5,13 +5,13 @@ sumsq_even([],0).
 sumsq_even([Head|Tail],Result):-
     mod(Head,2) =:= 0,Power is Head * Head, 
     sumsq_even(Tail,Sum), Result is Power+Sum.
-sumsq_even([Head|Tail],Sum):-
+sumsq_even([_|Tail],Sum):-
     sumsq_even(Tail,Sum).
 /*Q1.2 List Processing-log_table*/
 log_table([],[]).
 log_table([Head|Numlist],[[Head,Result]|Resultlist]):-
     Head > 0,Result is log(Head), log_table(Numlist,Resultlist).
-log_table([Head|Numlist],Resultlist):-
+log_table([_|Numlist],Resultlist):-
     log_table(Numlist,Resultlist).
 /*Q1.3 List Processing-paruns*/
 paruns([],[]).
@@ -28,11 +28,14 @@ dele([Head1|List],[Head2|Sublist],Result):-
 even([],[]).
 even([Head|List],[Head|Out]):-
     mod(Head,2) =:= 0,even(List,Out).
-even([Head|List],[]):-
+even([Head|_],[]):-
     mod(Head,2) =:= 1.
 
 odd([],[]).
 odd([Head|List],[Head|Out]):-
     mod(Head,2) =:= 1,odd(List,Out).
-odd([Head|List],[]):-
+odd([Head|_],[]):-
     mod(Head,2) =:= 0.
+/*prolog terms*/
+eval(Expr,V):-Expr.
+add(X,Y):-X+Y.
