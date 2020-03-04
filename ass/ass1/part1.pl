@@ -3,6 +3,7 @@
 /*Q1.1 List Processing-Sumsq_even*/
 sumsq_even([],0).
 sumsq_even([Head|Tail],Result):-
+    integer(Head),
     mod(Head,2) =:= 0,Power is Head * Head, 
     sumsq_even(Tail,Sum), Result is Power+Sum.
 sumsq_even([_|Tail],Sum):-
