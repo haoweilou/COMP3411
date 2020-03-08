@@ -11,7 +11,7 @@ sumsq_even([_|Tail],Sum):-
 /*Q1.2 List Processing-log_table*/
 log_table([],[]).
 log_table([Head|Numlist],[[Head,Result]|Resultlist]):-
-    Head > 0,Result is log(Head), log_table(Numlist,Resultlist).
+    Head >= 0,Result is log(Head), log_table(Numlist,Resultlist).
 log_table([_|Numlist],Resultlist):-
     log_table(Numlist,Resultlist).
 /*Q1.3 List Processing-paruns*/
