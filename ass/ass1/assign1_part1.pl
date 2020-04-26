@@ -37,24 +37,25 @@ odd([Head|List],[Head|Out]):-
     mod(Head,2) =:= 1,odd(List,Out).
 odd([Head|_],[]):-
     mod(Head,2) =:= 0.
+    
 /*Q1.4 prolog terms*/
 eval(Expr,Val):-
-Expr = add(X,Y),number(X),number(Y),Val is X+Y;
-Expr = add(X,Y),number(Y),eval(X,Result),Val is Result+Y;
-Expr = add(X,Y),number(X),eval(Y,Result),Val is Result+X;
-Expr = add(X,Y),eval(X,Result1),eval(Y,Result2),Vald is Result1+Result2;
+    Expr = add(X,Y),number(X),number(Y),Val is X+Y;
+    Expr = add(X,Y),number(Y),eval(X,Result),Val is Result+Y;
+    Expr = add(X,Y),number(X),eval(Y,Result),Val is Result+X;
+    Expr = add(X,Y),eval(X,Result1),eval(Y,Result2),Val is Result1+Result2;
 
-Expr = sub(X,Y),number(X),number(Y),Val is X-Y;
-Expr = sub(X,Y),number(Y),eval(X,Result),Val is Result-Y;
-Expr = sub(X,Y),number(X),eval(Y,Result),Val is X-Result;
-Expr = sub(X,Y),eval(X,Result1),eval(Y,Result2),Vald is Result1-Result2;
+    Expr = sub(X,Y),number(X),number(Y),Val is X-Y;
+    Expr = sub(X,Y),number(Y),eval(X,Result),Val is Result-Y;
+    Expr = sub(X,Y),number(X),eval(Y,Result),Val is X-Result;
+    Expr = sub(X,Y),eval(X,Result1),eval(Y,Result2),Val is Result1-Result2;
 
-Expr = mul(X,Y),number(X),number(Y),Val is X*Y;
-Expr = mul(X,Y),number(Y),eval(X,Result),Val is Result*Y;
-Expr = mul(X,Y),number(X),eval(Y,Result),Val is Result*X;
-Expr = mul(X,Y),eval(X,Result1),eval(Y,Result2),Vald is Result1*Result2;
+    Expr = mul(X,Y),number(X),number(Y),Val is X*Y;
+    Expr = mul(X,Y),number(Y),eval(X,Result),Val is Result*Y;
+    Expr = mul(X,Y),number(X),eval(Y,Result),Val is Result*X;
+    Expr = mul(X,Y),eval(X,Result1),eval(Y,Result2),Val is Result1*Result2;
 
-Expr = div(X,Y),number(X),number(Y),Val is X/Y;
-Expr = div(X,Y),number(Y),eval(X,Result),Val is Result/Y;
-Expr = div(X,Y),number(X),eval(Y,Result),Val is X/Result;
-Expr = div(X,Y),eval(X,Result1),eval(Y,Result2),Vald is Result1/Result2.
+    Expr = div(X,Y),number(X),number(Y),Val is X/Y;
+    Expr = div(X,Y),number(Y),eval(X,Result),Val is Result/Y;
+    Expr = div(X,Y),number(X),eval(Y,Result),Val is X/Result;
+    Expr = div(X,Y),eval(X,Result1),eval(Y,Result2),Val is Result1/Result2.

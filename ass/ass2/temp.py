@@ -10,8 +10,8 @@ features = data.iloc[:,:-1].values
 answer = data.iloc[:,-1].values
 
 test = pd.read_csv('./adult.test',header=None,skiprows=1) #load test
-features_test = data.iloc[:,:-1].values
-answer_test = data.iloc[:,-1].values
+features_test = test.iloc[:,:-1].values
+answer_test = test.iloc[:,-1].values
 
 encode_data = LabelEncoder()#encode data
 encode_data.fit(features[: , 1])
@@ -27,6 +27,7 @@ features[: , 13] = encode_data.fit_transform(features[: , 13])
 decision_tree = tree.DecisionTreeClassifier(criterion='entropy',splitter='best',max_depth=6,random_state=0)
 decision_tree = decision_tree.fit(features,answer)
 
+encode_data = LabelEncoder()#encode data
 encode_data.fit(features_test[: , 1])
 features_test[: , 1] = encode_data.fit_transform(features_test[: , 1])
 features_test[: , 3] = encode_data.fit_transform(features_test[: , 3])
@@ -41,7 +42,8 @@ prediction = decision_tree.predict(features_test)
 i = 0
 correct = 0
 while i < len(prediction):
-    if prediction[i] == answer_test[i]:
+    #replace the dot
+    if prediction[i] == answer_test[i][:-1]:
         correct += 1
     i += 1
 print('The accuracy rate is:',"{:.2%}".format(correct/i))
