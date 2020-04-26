@@ -11,7 +11,7 @@ answer = data.iloc[:,-1].values
 
 test = pd.read_csv('./adult.test',header=None,skiprows=1) #load test
 features_test = data.iloc[:,:-1].values
-answer_test = data.iloc[:,-1].values
+answer_test = test.iloc[:,-1].values
 
 encode_data = LabelEncoder()#encode data
 encode_data.fit(features[: , 1])
