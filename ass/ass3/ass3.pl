@@ -148,9 +148,52 @@ possessive(his, [number(singular), gender(masculine)]).
 possessive(her, [number(singular), gender(feminine)]).
 
 % You have to write this:
-% process(LogicalForm, Ref1, Ref2).
+% Stop if there is no logical form
+search_noun_verb([]).
+% If the current form is pronouns, skip and search next
+search_noun_verb(possessive(_,LogicalForm)):-
+    search_noun_verb(LogicalForm).
+search_noun_verb(personal(_)).
+% Save information into history if the current word is noun, and search next
+search_noun_verb(thing(Name,LogicalForm)):-
+    thing(Name,Properties),
+    search_noun_verb(LogicalForm),
+    assert(history(thing(Name,Properties))).
+% Save information into history if the current word is verb, search for actor and object
+search_noun_verb(event(Verb,[actor(Actor),object(Object)])):-
+    search_noun_verb(Actor),
+    search_noun_verb(Object),
+    assert(history(event(Verb,[actor(Actor),object(Object)]))).
+% Particular for gave
+search_noun_verb(event(Verb,[actor(Actor),recipient(Recipient),object(Object)])):-
+    search_noun_verb(Actor),
+    search_noun_verb(Recipient),
+    search_noun_verb(Object),
+    assert(history(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]))).
 
+% Verb
+search_pronouns(event(_,[actor(Actor),object(Object)]),Prev,Answer):-
+    search_pronouns(Actor,Prev,Lis1),
+    search_pronouns(Object,Prev,Lis2),
+    append(Prev,Lis1,Temp),
+    append(Temp,Lis2,Answer).
+% Noun
+search_pronouns(thing(_,_),_,[]).
+% If it is pronouns
+search_pronouns(possessive(Name,LogicalForm),Prev,Answer):-
+    search_pronouns(LogicalForm,Prev,List1),
+    append(Prev,[Name],Temp),
+    append(Temp,List1,Answer).
 
+search_pronouns(personal(Name),Prev,Answer):-
+    append(Prev,[Name],Answer).
+    
+
+process([],[],[]).
+process(LogicalForm, Ref1, Ref2):-
+    search_noun_verb(LogicalForm),
+    search_pronouns(LogicalForm,[],Answer),
+    append(Answer,[],Ref2).
 run(S, Refs) :-
 	sentence(X, S, []), !,
 	writeln(X),
