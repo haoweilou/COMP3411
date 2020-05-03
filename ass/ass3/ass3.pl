@@ -142,7 +142,7 @@ event(gave, [actor(Person1), recipient(Person2), object(_), tense(past)]) :- Per
 personal(he, [number(singular), gender(masculine)]).
 personal(she, [number(singular), gender(feminine)]).
 personal(it, [number(singular), gender(neutral)]).
-personal(they, [ number(plural), gender(neutral)]).
+personal(they, [number(plural), gender(neutral)]).
 
 possessive(his, [number(singular), gender(masculine)]).
 possessive(her, [number(singular), gender(feminine)]).
@@ -156,44 +156,73 @@ search_noun_verb(possessive(_,LogicalForm)):-
 search_noun_verb(personal(_)).
 % Save information into history if the current word is noun, and search next
 search_noun_verb(thing(Name,LogicalForm)):-
-    thing(Name,Properties),
-    search_noun_verb(LogicalForm),
-    assert(history(thing(Name,Properties))).
+    thing(Name,Properties),history(thing(Name,Properties)),search_noun_verb(LogicalForm);
+    thing(Name,Properties),assert(history(thing(Name,Properties))),search_noun_verb(LogicalForm).
+% And
+search_noun_verb(set(A,B)):-
+    search_noun_verb(A),
+    search_noun_verb(B).
 % Save information into history if the current word is verb, search for actor and object
 search_noun_verb(event(Verb,[actor(Actor),object(Object)])):-
-    search_noun_verb(Actor),
-    search_noun_verb(Object),
+    search_noun_verb(Actor),search_noun_verb(Object),
+    history(event(Verb,[actor(Actor),object(Object)]));
     assert(history(event(Verb,[actor(Actor),object(Object)]))).
 % Particular for gave
 search_noun_verb(event(Verb,[actor(Actor),recipient(Recipient),object(Object)])):-
     search_noun_verb(Actor),
     search_noun_verb(Recipient),
     search_noun_verb(Object),
+    history(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]));
     assert(history(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]))).
 
 % Verb
-search_pronouns(event(_,[actor(Actor),object(Object)]),Prev,Answer):-
-    search_pronouns(Actor,Prev,Lis1),
-    search_pronouns(Object,Prev,Lis2),
-    append(Prev,Lis1,Temp),
-    append(Temp,Lis2,Answer).
+search_pronouns(event(_,[actor(Actor),object(Object)]),Answer):-
+    search_pronouns(Actor,Lis1),
+    search_pronouns(Object,Lis2),
+    append(Lis1,Lis2,Answer).
+% If and exist
+search_pronouns(set(A,B),Answer):-
+    search_pronouns(A,A1),
+    search_pronouns(B,B1),
+    append(A1,B1,Answer),
+    assert(history(set(A,B))).
 % Noun
-search_pronouns(thing(_,_),_,[]).
+search_pronouns(thing(_,_),[]).
 % If it is pronouns
-search_pronouns(possessive(Name,LogicalForm),Prev,Answer):-
-    search_pronouns(LogicalForm,Prev,List1),
-    append(Prev,[Name],Temp),
-    append(Temp,List1,Answer).
+search_pronouns(possessive(Name,LogicalForm),[Name|List1]):-
+    search_pronouns(LogicalForm,List1).
 
-search_pronouns(personal(Name),Prev,Answer):-
-    append(Prev,[Name],Answer).
+search_pronouns(personal(Name),[Name]).
+% Start search objects
+search_objects([],[]).
+
+search_objects([Head|Tail],[Found|Remain]):-
+    search_in_db(Head,Found),
+    search_objects(Tail,Remain).
+
+search_in_db(Pronouns,Answers):-
+    Pronouns = he,history(thing(Answers,[isa(person), gender(masculine), number(singular)]));
+    Pronouns = his,history(thing(Answers,[isa(person), gender(masculine), number(singular)]));
+    Pronouns = she,history(thing(Answers,[isa(person), gender(feminine), number(singular)]));
+    Pronouns = her,history(thing(Answers,[isa(person), gender(feminine), number(singular)]));
+    Pronouns = it,history(thing(Answers,[isa(physical_object), gender(neutral), number(singular)]));
+    Pronouns = they,history(set(thing(A,_),thing(B,_))),Answers=[A,B].
+
+find_they(Prev,[Name|Answers2]):- 
+    history(thing(Name,_)),
+    not(member(Name,Prev)),
+    append(Prev,[Name],Prev1),
+    find_they(Prev1,Answers2).
+
     
 
 process([],[],[]).
 process(LogicalForm, Ref1, Ref2):-
     search_noun_verb(LogicalForm),
-    search_pronouns(LogicalForm,[],Answer),
-    append(Answer,[],Ref2).
+    search_pronouns(LogicalForm,Answer),
+    search_objects(Answer,Object),
+    append(Ref1,Object,Ref2).
+
 run(S, Refs) :-
 	sentence(X, S, []), !,
 	writeln(X),
