@@ -150,31 +150,33 @@ possessive(her, [number(singular), gender(feminine)]).
 % You have to write this:
 % Stop if there is no logical form
 search_noun_verb([]).
+% List
+search_noun_verb([X]):-search_noun_verb(X).
+% object
+search_noun_verb(object(X)):-search_noun_verb(X).
+% actor
+search_noun_verb(actor(X)):-search_noun_verb(X).
 % If the current form is pronouns, skip and search next
 search_noun_verb(possessive(_,LogicalForm)):-
     search_noun_verb(LogicalForm).
 search_noun_verb(personal(_)).
 % Save information into history if the current word is noun, and search next
 search_noun_verb(thing(Name,LogicalForm)):-
-    thing(Name,Properties),history(thing(Name,Properties)),search_noun_verb(LogicalForm);
-    thing(Name,Properties),assert(history(thing(Name,Properties))),search_noun_verb(LogicalForm).
+    thing(Name,Properties),
+    assert(history(thing(Name,Properties))),
+    search_noun_verb(LogicalForm).
 % And
-search_noun_verb(set(A,B)):-
-    search_noun_verb(A),
-    search_noun_verb(B).
+search_noun_verb(set(A,B)):-search_noun_verb(A),search_noun_verb(B).
 % Save information into history if the current word is verb, search for actor and object
-search_noun_verb(event(Verb,[actor(Actor),object(Object)])):-
+search_noun_verb(event(Verb,[Actor,Object])):-
     search_noun_verb(Actor),search_noun_verb(Object),
-    history(event(Verb,[actor(Actor),object(Object)]));
-    assert(history(event(Verb,[actor(Actor),object(Object)]))).
+    assert(history(event(Verb,[Actor,Object]))).
 % Particular for gave
 search_noun_verb(event(Verb,[actor(Actor),recipient(Recipient),object(Object)])):-
     search_noun_verb(Actor),
     search_noun_verb(Recipient),
     search_noun_verb(Object),
-    history(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]));
     assert(history(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]))).
-
 % Verb
 search_pronouns(event(_,[actor(Actor),object(Object)]),Answer):-
     search_pronouns(Actor,Lis1),
