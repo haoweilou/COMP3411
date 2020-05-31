@@ -20,12 +20,12 @@ np1(Number, thing(Name, [])) -->
 	proper_noun(Number, _, Name).
 np1(Number, personal(Pro)) -->
 	pronoun(Number, _, Pro).
-np1(Number1, possessive(Pos, thing(Noun, []))) -->
-	possessive_pronoun(Number1, _, Pos), noun(_, Noun).
+np1(Number1, possessive(Pos, NP)) -->
+	possessive_pronoun(Number1, _, Pos), noun_phrase(_, NP).
 np1(Number, object(Noun)) -->
 	num(Number), noun(Number, Noun).
 
-adjp([prop(Adj)]) --> adjective(Adj).
+adjp([Adj]) --> adjective(Adj).
 adjp([]) --> [].
 
 verb_phrase(Actor, Number, event(V, [actor(Actor) | Adv])) -->
@@ -60,8 +60,9 @@ determiner(_, _) --> [].
 
 pronoun(singular, masculine, he) --> [he].
 pronoun(singular, feminine, she) --> [she].
-pronoun(_, neutral, what) --> [what].
-pronoun(singular, neutral,Pro) --> [Pro], {member(Pro, [i, someone, it])}.
+pronoun(singular, neutral, that) --> [that].
+pronoun(plural, neutral, those) --> [those].
+pronoun(singular, neutral, Pro) --> [Pro], {member(Pro, [i, someone, it])}.
 pronoun(plural, neutral, Pro) --> [Pro], {member(Pro, [they, some])}.
 
 possessive_pronoun(singular, masculine, his) --> [his].
@@ -86,7 +87,7 @@ proper_noun(singular, Gender, Name) -->
 	}.
 proper_noun(singular, neutral, france) --> [france].
 
-adjective(adj(Adj)) --> [Adj], {member(Adj, [red,green,blue])}.
+adjective(prop(Adj)) --> [Adj], {member(Adj, [red,green,blue])}.
 
 verb(_, Verb) --> [Verb], {member(Verb, [lost,found,did,gave,looked,saw,forgot,is])}.
 verb(singular, Verb) --> [Verb], {member(Verb, [scares,hates])}.
@@ -139,9 +140,12 @@ event(hates, [actor(_), object(_), tense(present), number(singular)]).
 event(hate, [actor(_), object(_), tense(present), number(plural)]).
 event(gave, [actor(Person1), recipient(Person2), object(_), tense(past)]) :- Person1 \= Person2.
 
+personal(i, [number(singular), gender(neutral)]).
 personal(he, [number(singular), gender(masculine)]).
 personal(she, [number(singular), gender(feminine)]).
 personal(it, [number(singular), gender(neutral)]).
+personal(that, [number(singular), gender(neutral)]).
+personal(those, [number(plural), gender(neutral)]).
 personal(they, [number(plural), gender(neutral)]).
 
 possessive(his, [number(singular), gender(masculine)]).
@@ -177,8 +181,13 @@ search_noun_verb(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]))
     search_noun_verb(Recipient),
     search_noun_verb(Object),
     assert(history(event(Verb,[actor(Actor),recipient(Recipient),object(Object)]))).
+
+% object
+search_pronouns(object(X),Answer):-search_pronouns(X,Answer).
+% actor
+search_pronouns(actor(X),Answer):-search_pronouns(X,Answer).
 % Verb
-search_pronouns(event(_,[actor(Actor),object(Object)]),Answer):-
+search_pronouns(event(_,[Actor,Object]),Answer):-
     search_pronouns(Actor,Lis1),
     search_pronouns(Object,Lis2),
     append(Lis1,Lis2,Answer).
@@ -189,11 +198,14 @@ search_pronouns(set(A,B),Answer):-
     append(A1,B1,Answer),
     assert(history(set(A,B))).
 % Noun
-search_pronouns(thing(_,_),[]).
+search_pronouns(thing(_,[]),[]).
+search_pronouns(thing(_,[Head|Tail]),Answer):-
+    search_pronouns(Head,A1),
+    search_pronouns(thing(_,Tail),B1),
+    append(A1,B1,Answer).
 % If it is pronouns
 search_pronouns(possessive(Name,LogicalForm),[Name|List1]):-
     search_pronouns(LogicalForm,List1).
-
 search_pronouns(personal(Name),[Name]).
 % Start search objects
 search_objects([],[]).
